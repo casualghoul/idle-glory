@@ -2,6 +2,7 @@ package save
 
 import (
 	"encoding/json"
+	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
@@ -165,44 +166,24 @@ func TestLoad_CorruptFile_BackedUp(t *testing.T) {
 		t.Error("save.json should not exist after corrupt-backup")
 	}
 
-	// A backup file named save.json.corrupt-<unix> must exist with the garbage.
-	backupName := filepath.Join(dir, "save.json.corrupt-"+formatUnix(ts.Unix()))
-	data, err := os.ReadFile(backupName)
+	// A backup file named save.json.corrupt-<unix>[-(n)] must exist with the
+	// garbage bytes. Locate it robustly via glob rather than reconstructing the
+	// exact name, which is fragile if the collision-suffix logic fires.
+	pattern := filepath.Join(dir, fmt.Sprintf("save.json.corrupt-%d*", ts.Unix()))
+	matches, err := filepath.Glob(pattern)
 	if err != nil {
-		t.Fatalf("backup file missing (%s): %v", backupName, err)
+		t.Fatalf("glob error: %v", err)
+	}
+	if len(matches) != 1 {
+		t.Fatalf("expected exactly 1 backup file matching %s, got %v", pattern, matches)
+	}
+	data, err := os.ReadFile(matches[0])
+	if err != nil {
+		t.Fatalf("backup file missing (%s): %v", matches[0], err)
 	}
 	if string(data) != string(garbage) {
 		t.Errorf("backup contents differ: got %q", data)
 	}
-}
-
-// formatUnix converts a unix timestamp to the string form used in backup names.
-func formatUnix(ts int64) string {
-	return strings.TrimSpace(string(appendInt(nil, ts)))
-}
-
-// appendInt appends the decimal representation of n to buf.
-func appendInt(buf []byte, n int64) []byte {
-	return append(buf, []byte(itoa(n))...)
-}
-
-func itoa(n int64) string {
-	if n == 0 {
-		return "0"
-	}
-	b := make([]byte, 0, 20)
-	neg := n < 0
-	if neg {
-		n = -n
-	}
-	for n > 0 {
-		b = append([]byte{byte('0' + n%10)}, b...)
-		n /= 10
-	}
-	if neg {
-		b = append([]byte{'-'}, b...)
-	}
-	return string(b)
 }
 
 func TestLoad_CorruptFile_MessageContainsBackupPath(t *testing.T) {

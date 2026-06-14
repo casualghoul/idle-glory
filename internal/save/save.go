@@ -138,7 +138,7 @@ func Load(dir string, clk Clock) (LoadOut, error) {
 
 	var rec saveRecord
 	if err := json.Unmarshal(data, &rec); err != nil {
-		msg, backupErr := backupCorrupt(dir, path, data, clk)
+		msg, backupErr := backupCorrupt(dir, path, clk)
 		if backupErr != nil {
 			return LoadOut{}, backupErr
 		}
@@ -147,7 +147,7 @@ func Load(dir string, clk Clock) (LoadOut, error) {
 
 	// Version guard: future version → treat like corrupt (backup + fresh).
 	if rec.Version > currentVersion {
-		msg, backupErr := backupCorrupt(dir, path, data, clk)
+		msg, backupErr := backupCorrupt(dir, path, clk)
 		if backupErr != nil {
 			return LoadOut{}, backupErr
 		}
@@ -162,6 +162,9 @@ func Load(dir string, clk Clock) (LoadOut, error) {
 		rec = migrate(rec, rec.Version)
 	}
 
+	// NOTE: migrated state is not written back to disk here. The caller should
+	// call Save after a successful Load so that the migration is persisted and
+	// subsequent loads no longer need to migrate.
 	return LoadOut{
 		Result:  LoadOK,
 		State:   rec.State,
@@ -184,17 +187,28 @@ func migrate(rec saveRecord, fromVersion int) saveRecord {
 	switch fromVersion {
 	// v0 → v1: no structural changes; just stamp the current version.
 	// (v0 was a pre-release format with no version field; json decodes it as 0.)
-	default:
+	case 0:
 		rec.Version = currentVersion
+	default:
+		// Unknown fromVersion; the version-range guard in Load prevents this.
 	}
 	return rec
 }
 
 // backupCorrupt moves the live save aside to save.json.corrupt-<unix> and
 // removes the original path. Returns a human-readable message and any error.
-func backupCorrupt(dir, path string, _ []byte, clk Clock) (string, error) {
+// If the target path already exists (two backups within the same second), a
+// short numeric suffix (-1, -2, …) is appended until a free name is found.
+func backupCorrupt(dir, path string, clk Clock) (string, error) {
 	ts := clk.Now().Unix()
-	backupPath := filepath.Join(dir, fmt.Sprintf("save.json.corrupt-%d", ts))
+	base := filepath.Join(dir, fmt.Sprintf("save.json.corrupt-%d", ts))
+	backupPath := base
+	for i := 1; ; i++ {
+		if _, err := os.Stat(backupPath); os.IsNotExist(err) {
+			break
+		}
+		backupPath = fmt.Sprintf("%s-%d", base, i)
+	}
 	if err := os.Rename(path, backupPath); err != nil {
 		return "", fmt.Errorf("save: backup corrupt save to %s: %w", backupPath, err)
 	}
