@@ -1,6 +1,9 @@
 package game
 
-import "math"
+import (
+	"fmt"
+	"math"
+)
 
 // EffectType identifies which aspect of State an Upgrade modifies.
 type EffectType int
@@ -109,6 +112,8 @@ func Buy(s State, id string) (State, bool) {
 		next.MunitionsRate += found.EffectValue
 	case EffectArmyPower:
 		next.ArmyPower += found.EffectValue
+	default:
+		panic(fmt.Sprintf("game.Buy: unhandled EffectType %d for upgrade %q", found.EffectType, found.ID))
 	}
 
 	return next, true

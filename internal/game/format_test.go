@@ -1,6 +1,7 @@
 package game_test
 
 import (
+	"strings"
 	"testing"
 
 	"github.com/andrewhorton/glory/internal/game"
@@ -31,14 +32,7 @@ func TestFormatNum(t *testing.T) {
 	for _, tc := range cases {
 		t.Run(tc.desc, func(t *testing.T) {
 			got := game.FormatNum(tc.n)
-			found := false
-			for i := 0; i+len(tc.contains) <= len(got); i++ {
-				if got[i:i+len(tc.contains)] == tc.contains {
-					found = true
-					break
-				}
-			}
-			if !found {
+			if !strings.Contains(got, tc.contains) {
 				t.Errorf("FormatNum(%v) = %q, expected it to contain %q", tc.n, got, tc.contains)
 			}
 		})
@@ -48,22 +42,27 @@ func TestFormatNum(t *testing.T) {
 func TestFormatNum_Boundaries(t *testing.T) {
 	// 999 should NOT contain K
 	got := game.FormatNum(999)
-	for i := 0; i+1 <= len(got); i++ {
-		if got[i] == 'K' {
-			t.Errorf("FormatNum(999) = %q, should not contain K", got)
-		}
+	if strings.Contains(got, "K") {
+		t.Errorf("FormatNum(999) = %q, should not contain K", got)
 	}
 
 	// 1000 should contain K
 	got = game.FormatNum(1000)
-	found := false
-	for _, c := range got {
-		if c == 'K' {
-			found = true
-			break
-		}
-	}
-	if !found {
+	if !strings.Contains(got, "K") {
 		t.Errorf("FormatNum(1000) = %q, expected K", got)
+	}
+}
+
+func TestFormatNum_RoundingBoundary(t *testing.T) {
+	// 999.995 rounds to 1000.00 when printed with %.2f, so it must get a K suffix.
+	got := game.FormatNum(999.995)
+	if !strings.Contains(got, "K") {
+		t.Errorf("FormatNum(999.995) = %q, expected K suffix (rounds to 1000.00)", got)
+	}
+
+	// Negative mirror.
+	got = game.FormatNum(-999.995)
+	if !strings.Contains(got, "K") {
+		t.Errorf("FormatNum(-999.995) = %q, expected K suffix (rounds to -1000.00)", got)
 	}
 }

@@ -1,6 +1,9 @@
 package game
 
-import "fmt"
+import (
+	"fmt"
+	"math"
+)
 
 // FormatNum formats n as a human-readable string:
 //
@@ -12,15 +15,15 @@ import "fmt"
 //
 // Plain float64 is used throughout; no type aliases.
 func FormatNum(n float64) string {
-	neg := n < 0
-	abs := n
-	if neg {
-		abs = -n
-	}
+	// Use the rounded absolute value for threshold comparisons so the suffix
+	// matches what fmt.Sprintf will actually print (e.g. 999.995 rounds to
+	// 1000.00, so it must be formatted with the K suffix).
+	abs := math.Abs(n)
+	absRounded := math.Round(abs*100) / 100
 
 	var s string
 	switch {
-	case abs < 1_000:
+	case absRounded < 1_000:
 		// Use fixed-point with up to 2 decimal places; strip trailing zeros.
 		s = fmt.Sprintf("%.2f", n)
 		// Trim trailing zeros and unnecessary decimal point for integers.
@@ -32,11 +35,11 @@ func FormatNum(n float64) string {
 			trimmed = trimmed[:len(trimmed)-1]
 		}
 		s = trimmed
-	case abs < 1_000_000:
+	case absRounded < 1_000_000:
 		s = fmt.Sprintf("%.2fK", n/1_000)
-	case abs < 1_000_000_000:
+	case absRounded < 1_000_000_000:
 		s = fmt.Sprintf("%.2fM", n/1_000_000)
-	case abs < 1e12:
+	case absRounded < 1e12:
 		s = fmt.Sprintf("%.2fB", n/1_000_000_000)
 	default:
 		s = fmt.Sprintf("%.2e", n)

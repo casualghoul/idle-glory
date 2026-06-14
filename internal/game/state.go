@@ -32,7 +32,7 @@ func Tick(s State, dt time.Duration) State {
 	if dt == 0 {
 		return s
 	}
-	seconds := dt.Seconds()
-	s.Munitions += s.MunitionsRate * seconds
-	return s
+	next := s
+	next.Munitions += next.MunitionsRate * dt.Seconds()
+	return next
 }
