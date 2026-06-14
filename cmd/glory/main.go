@@ -7,13 +7,16 @@
 // Environment variables:
 //
 //	GLORY_SAVE_DIR   override for the save directory (default: XDG config path)
-//	GLORY_HEADLESS   set to "1" to enable headless mode without the flag
+//	GLORY_HEADLESS   set to "1", "true", "yes", or "on" (case-insensitive) to
+//	                 enable headless mode without the flag
 package main
 
 import (
 	"flag"
 	"fmt"
+	"io"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/andrewhorton/glory/internal/game"
@@ -33,6 +36,16 @@ type headlessConfig struct {
 var defaultHeadlessConfig = headlessConfig{
 	ticks:  30,
 	tickDt: time.Second,
+}
+
+// isTruthy reports whether s is a common affirmative value ("1", "true", "yes",
+// or "on"), compared case-insensitively.
+func isTruthy(s string) bool {
+	switch strings.ToLower(s) {
+	case "1", "true", "yes", "on":
+		return true
+	}
+	return false
 }
 
 // newState returns the canonical starting state for a fresh game.
@@ -72,7 +85,7 @@ func runHeadless(state game.State, _ save.Clock, cfg headlessConfig) game.State 
 }
 
 // printState writes a human-readable summary of s to w.
-func printState(w *os.File, s game.State) {
+func printState(w io.Writer, s game.State) {
 	fmt.Fprintf(w, "  Munitions:     %s\n", game.FormatNum(s.Munitions))
 	fmt.Fprintf(w, "  Rate:          %s/s\n", game.FormatNum(s.MunitionsRate))
 	fmt.Fprintf(w, "  Army Power:    %s\n", game.FormatNum(s.ArmyPower))
@@ -92,7 +105,7 @@ func main() {
 		"run a deterministic core-loop demo, save, and exit (useful for CI)")
 	flag.Parse()
 
-	headless := *headlessFlag || os.Getenv("GLORY_HEADLESS") == "1"
+	headless := *headlessFlag || isTruthy(os.Getenv("GLORY_HEADLESS"))
 
 	// Resolve save directory — prefer explicit env override, then XDG default.
 	saveDir := os.Getenv("GLORY_SAVE_DIR")

@@ -2,7 +2,7 @@ package main
 
 import (
 	"os"
-	"path/filepath"
+	"strings"
 	"testing"
 	"time"
 
@@ -24,11 +24,6 @@ func newTestClock() *fakeClock {
 	return &fakeClock{t: ref}
 }
 
-// newTestState returns a starting state with observable munitions rate.
-func newTestState() game.State {
-	return newState()
-}
-
 // TestQuitSavesProgressAndRelaunchRestoresIt verifies that Save + Load round-trips
 // the game state exactly (munitions, rate, owned counts).
 func TestQuitSavesProgressAndRelaunchRestoresIt(t *testing.T) {
@@ -36,7 +31,7 @@ func TestQuitSavesProgressAndRelaunchRestoresIt(t *testing.T) {
 	clk := newTestClock()
 
 	// Build up some state.
-	s := newTestState()
+	s := newState()
 	// Tick forward 60 seconds to accumulate munitions.
 	s = game.Tick(s, 60*time.Second)
 
@@ -73,7 +68,7 @@ func TestAwayProgressOnRelaunch(t *testing.T) {
 	dir := t.TempDir()
 	clk := newTestClock()
 
-	s := newTestState()
+	s := newState()
 	savedAt := clk.Now()
 
 	if err := save.Save(dir, clk, s); err != nil {
@@ -110,7 +105,7 @@ func TestBackwardClockClamp(t *testing.T) {
 	dir := t.TempDir()
 	clk := newTestClock()
 
-	s := newTestState()
+	s := newState()
 	savedAt := clk.Now()
 
 	if err := save.Save(dir, clk, s); err != nil {
@@ -148,7 +143,7 @@ func TestHugeSleepClamp(t *testing.T) {
 	dir := t.TempDir()
 	clk := newTestClock()
 
-	s := newTestState()
+	s := newState()
 	savedAt := clk.Now()
 
 	if err := save.Save(dir, clk, s); err != nil {
@@ -181,7 +176,7 @@ func TestHugeSleepClamp(t *testing.T) {
 // TestBuyChangesAccumulationRate verifies that purchasing a MunitionsRate upgrade
 // causes subsequent ticks to accumulate faster.
 func TestBuyChangesAccumulationRate(t *testing.T) {
-	s := newTestState()
+	s := newState()
 
 	// Tick before buying.
 	dt := 10 * time.Second
@@ -239,8 +234,7 @@ func TestCorruptSaveHandling(t *testing.T) {
 	}
 	found := false
 	for _, e := range entries {
-		if len(e.Name()) > len("save.json.corrupt-") &&
-			e.Name()[:len("save.json.corrupt-")] == "save.json.corrupt-" {
+		if strings.HasPrefix(e.Name(), "save.json.corrupt-") {
 			found = true
 			break
 		}
@@ -255,14 +249,15 @@ func TestCorruptSaveHandling(t *testing.T) {
 // deterministic inputs.
 func TestRunHeadlessProducesValidState(t *testing.T) {
 	clk := newTestClock()
-	start := newTestState()
+	start := newState()
 
 	result := runHeadless(start, clk, headlessConfig{
 		ticks:  10,
 		tickDt: time.Second,
 	})
 
-	// After 10 ticks of 1 second each, munitions must have grown.
+	// Strictly-less-than floor: mid-loop purchases reduce the stockpile, so we
+	// assert net growth, not exact accumulation.
 	expectedMin := start.Munitions + start.MunitionsRate*10
 	if result.Munitions < expectedMin {
 		t.Errorf("runHeadless: want munitions >= %.4f, got %.4f", expectedMin, result.Munitions)
@@ -304,5 +299,4 @@ func TestRunHeadlessFilepath(t *testing.T) {
 		t.Errorf("save file should exist at %s: %v", savePath, err)
 	}
 
-	_ = filepath.Join(dir, "save.json") // keep import used
 }
