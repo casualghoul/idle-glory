@@ -30,7 +30,17 @@ const (
 )
 
 // NewValueSpring creates a ValueSpring that ticks at fps frames per second.
+//
+// Tick-rate contract: the caller MUST call Step at the same rate as fps.
+// The spring advances one internal fixed dt = 1/fps per Step call; a
+// mismatch causes the animation to run at the wrong speed. For a 30 fps
+// tick loop, pass 30.
+//
+// Panics if fps <= 0.
 func NewValueSpring(fps int) *ValueSpring {
+	if fps <= 0 {
+		panic("anim: fps must be > 0")
+	}
 	dt := harmonica.FPS(fps)
 	return &ValueSpring{
 		spring: harmonica.NewSpring(dt, defaultAngularFrequency, defaultDampingRatio),
@@ -74,7 +84,17 @@ const (
 )
 
 // NewScreenShake creates a ScreenShake that ticks at fps frames per second.
+//
+// Tick-rate contract: the caller MUST call Step at the same rate as fps.
+// The spring advances one internal fixed dt = 1/fps per Step call; a
+// mismatch causes the shake to ring down at the wrong speed. For a 30 fps
+// tick loop, pass 30.
+//
+// Panics if fps <= 0.
 func NewScreenShake(fps int) *ScreenShake {
+	if fps <= 0 {
+		panic("anim: fps must be > 0")
+	}
 	dt := harmonica.FPS(fps)
 	return &ScreenShake{
 		spring: harmonica.NewSpring(dt, shakeAngularFrequency, shakeDampingRatio),
@@ -83,6 +103,10 @@ func NewScreenShake(fps int) *ScreenShake {
 
 // Trigger starts the shake by displacing the spring by magnitude columns.
 // A magnitude of ~5–10 is appropriate for a heavy shell impact.
+//
+// Sign semantics: a negative magnitude shakes in the opposite direction
+// (both positive and negative are valid). Pass math.Abs(magnitude) if you
+// always want the same initial direction regardless of the caller's sign.
 func (s *ScreenShake) Trigger(magnitude float64) {
 	s.pos = magnitude
 	s.vel = 0

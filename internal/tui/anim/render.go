@@ -52,10 +52,16 @@ func PlotShell(g RuneGrid, col, row int, glyph rune) {
 // value is clamped to [0, max]. The bar uses '█' for filled cells and
 // '░' for empty cells, returning a plain string with no ANSI styling.
 //
+// max must be >= 0. A negative max is treated as zero and produces an
+// all-empty bar of the given width.
+//
 // Example: Bar(50, 100, 8) → "████░░░░"
 func Bar(value, max float64, width int) string {
 	if width <= 0 {
 		return ""
+	}
+	if max <= 0 {
+		return strings.Repeat("░", width)
 	}
 	if value < 0 {
 		value = 0
@@ -64,10 +70,7 @@ func Bar(value, max float64, width int) string {
 		value = max
 	}
 
-	filled := 0
-	if max > 0 {
-		filled = int(value / max * float64(width))
-	}
+	filled := int(value / max * float64(width))
 	// Guard against rounding pushing filled beyond width.
 	if filled > width {
 		filled = width

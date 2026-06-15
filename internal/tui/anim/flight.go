@@ -32,7 +32,12 @@ type ShellFlight struct {
 // in the terminal, ArcHeight is subtracted so the shell arcs upward visually.
 //
 // elapsed is clamped to [0, Duration]; calling At beyond Duration is safe.
+// If Duration <= 0, the flight is considered already completed and (EndX, EndY, true)
+// is returned immediately.
 func (f ShellFlight) At(elapsed time.Duration) (x, y float64, done bool) {
+	if f.Duration <= 0 {
+		return f.EndX, f.EndY, true // zero-duration flight has already landed
+	}
 	p := float64(elapsed) / float64(f.Duration)
 	if p < 0 {
 		p = 0

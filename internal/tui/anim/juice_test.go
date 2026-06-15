@@ -48,7 +48,7 @@ func TestValueSpring_StartEqualsTarget_StaysPut(t *testing.T) {
 	}
 }
 
-func TestValueSpring_OvershoosBeforeSettling(t *testing.T) {
+func TestValueSpring_OvershootsBeforeSettling(t *testing.T) {
 	// An under-damped spring should overshoot its target at least once.
 	// Default params should be under-damped for juice.
 	vs := anim.NewValueSpring(60)

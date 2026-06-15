@@ -158,3 +158,37 @@ func TestNewRuneGrid_InitializesCorrectly(t *testing.T) {
 		}
 	}
 }
+
+func TestPlotShell_ZeroColumnGrid_NoPanic(t *testing.T) {
+	// A grid with rows but zero columns must not panic (covers the guard
+	// in PlotShell that returns early when cols == 0).
+	defer func() {
+		if r := recover(); r != nil {
+			t.Errorf("PlotShell panicked on zero-column grid: %v", r)
+		}
+	}()
+	// Manually construct a jagged grid: one row with zero columns.
+	grid := anim.RuneGrid{[]rune{}}
+	anim.PlotShell(grid, 0, 0, '●')
+	anim.PlotShell(grid, 5, 0, '●')
+}
+
+func TestBar_NegativeMax(t *testing.T) {
+	// Negative max must produce an all-empty bar of the given width.
+	b := anim.Bar(50, -1, 8)
+	if strings.Contains(b, "█") {
+		t.Errorf("Bar(50,-1,8) contains filled rune: %q", b)
+	}
+	if utf8.RuneCountInString(b) != 8 {
+		t.Errorf("Bar(50,-1,8) width = %d, want 8", utf8.RuneCountInString(b))
+	}
+
+	// Zero max: also all-empty.
+	b0 := anim.Bar(50, 0, 8)
+	if strings.Contains(b0, "█") {
+		t.Errorf("Bar(50,0,8) contains filled rune: %q", b0)
+	}
+	if utf8.RuneCountInString(b0) != 8 {
+		t.Errorf("Bar(50,0,8) width = %d, want 8", utf8.RuneCountInString(b0))
+	}
+}

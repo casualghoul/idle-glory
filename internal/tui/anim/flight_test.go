@@ -165,3 +165,54 @@ func TestShellFlight_AsymmetricEndpoints(t *testing.T) {
 		t.Errorf("midpoint y %v should be above chord %v", yMid, chordMid)
 	}
 }
+
+func TestShellFlight_ZeroDuration(t *testing.T) {
+	// A zero-duration flight should immediately return (EndX, EndY, true)
+	// with no NaN or Inf — guards against divide-by-zero producing NaN/+Inf.
+	f := anim.ShellFlight{
+		StartX: 10, StartY: 5, EndX: 80, EndY: 12,
+		ArcHeight: 6, Duration: 0,
+	}
+
+	x, y, done := f.At(0)
+	if math.IsNaN(x) || math.IsInf(x, 0) {
+		t.Errorf("ZeroDuration: x is NaN/Inf: %v", x)
+	}
+	if math.IsNaN(y) || math.IsInf(y, 0) {
+		t.Errorf("ZeroDuration: y is NaN/Inf: %v", y)
+	}
+	if x != f.EndX {
+		t.Errorf("ZeroDuration: x = %v, want EndX = %v", x, f.EndX)
+	}
+	if y != f.EndY {
+		t.Errorf("ZeroDuration: y = %v, want EndY = %v", y, f.EndY)
+	}
+	if !done {
+		t.Error("ZeroDuration: done = false, want true")
+	}
+
+	// Negative duration should also be safe.
+	f.Duration = -time.Second
+	x2, y2, done2 := f.At(0)
+	if x2 != f.EndX || y2 != f.EndY || !done2 {
+		t.Errorf("NegativeDuration: got (%v,%v,done=%v), want (%v,%v,true)", x2, y2, done2, f.EndX, f.EndY)
+	}
+}
+
+func TestShellFlight_Deterministic(t *testing.T) {
+	// At is a pure function: identical inputs must always produce identical outputs.
+	f := anim.ShellFlight{
+		StartX: 0, StartY: 10, EndX: 80, EndY: 10,
+		ArcHeight: 5, Duration: time.Second,
+	}
+
+	steps := []time.Duration{0, 100 * time.Millisecond, 500 * time.Millisecond, time.Second, 2 * time.Second}
+	for _, elapsed := range steps {
+		x1, y1, done1 := f.At(elapsed)
+		x2, y2, done2 := f.At(elapsed)
+		if x1 != x2 || y1 != y2 || done1 != done2 {
+			t.Errorf("At(%v) not deterministic: first=(%v,%v,%v) second=(%v,%v,%v)",
+				elapsed, x1, y1, done1, x2, y2, done2)
+		}
+	}
+}
