@@ -75,7 +75,7 @@ type Model struct {
 	lastTick   time.Time
 	haveTick   bool
 	sinceSave  time.Duration // accumulates toward autosaveInterval
-	saveErr    error         // last save error, shown transiently
+	saveErr    error         // most recent save error (nil on success); banner shows while non-nil, cleared on next successful save
 	awayBanner AwaySummary   // shown until the first key/fire
 	showAway   bool
 

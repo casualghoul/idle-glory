@@ -22,7 +22,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		return m.handleTick(time.Time(msg))
 
 	case saveErrMsg:
-		m.saveErr = msg.Err
+		m.saveErr = msg.Err // nil on success, clears any prior error banner
 		return m, nil
 
 	case tea.KeyMsg:
@@ -67,7 +67,7 @@ func (m Model) handleTick(t time.Time) (tea.Model, tea.Cmd) {
 	cmds = append(cmds, tickCmd())
 	m.sinceSave += dt
 	if m.sinceSave >= autosaveInterval {
-		m.sinceSave = 0
+		m.sinceSave -= autosaveInterval
 		cmds = append(cmds, m.saveCmd(m.state))
 	}
 

@@ -6,32 +6,14 @@ import (
 	"github.com/andrewhorton/glory/internal/game"
 )
 
-// upgradeKeys maps a 1-based digit key to its index in game.Upgrades.
-// "1" buys the first upgrade, "2" the second, and so on. Generated lazily so
-// the binding always tracks the (read-only) Upgrades table length.
+// upgradeKeyFor maps a single-digit key ("1".."9") to its zero-based index in
+// game.Upgrades. The index is bounds-checked against the live Upgrades table so
+// adding or removing upgrades never silently drops or activates a key binding.
 func upgradeKeyFor(s string) (idx int, ok bool) {
-	switch s {
-	case "1":
-		idx = 0
-	case "2":
-		idx = 1
-	case "3":
-		idx = 2
-	case "4":
-		idx = 3
-	case "5":
-		idx = 4
-	case "6":
-		idx = 5
-	case "7":
-		idx = 6
-	case "8":
-		idx = 7
-	case "9":
-		idx = 8
-	default:
+	if len(s) != 1 || s[0] < '1' || s[0] > '9' {
 		return 0, false
 	}
+	idx = int(s[0] - '1') // '1' → 0, '2' → 1, …, '9' → 8
 	if idx >= len(game.Upgrades) {
 		return 0, false
 	}

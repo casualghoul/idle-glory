@@ -13,16 +13,16 @@ import (
 // 16-color-safe palette (ANSI). Using named ANSI indices keeps the game
 // legible on basic terminals and over SSH.
 var (
-	colMud      = lipgloss.Color("3")  // dark yellow / khaki
-	colSky      = lipgloss.Color("6")  // cyan-ish sky
-	colPlayer   = lipgloss.Color("2")  // green — our line
-	colEnemy    = lipgloss.Color("1")  // red — the enemy
-	colShell    = lipgloss.Color("11") // bright yellow — the shell + flash
-	colMuted    = lipgloss.Color("8")  // grey — secondary text
-	colHi       = lipgloss.Color("15") // bright white — headlines
-	colVictory  = lipgloss.Color("10") // bright green
-	colDefeat   = lipgloss.Color("9")  // bright red
-	colStalemte = lipgloss.Color("7")  // white
+	colMud       = lipgloss.Color("3")  // dark yellow / khaki
+	colSky       = lipgloss.Color("6")  // cyan-ish sky
+	colPlayer    = lipgloss.Color("2")  // green — our line
+	colEnemy     = lipgloss.Color("1")  // red — the enemy
+	colShell     = lipgloss.Color("11") // bright yellow — the shell + flash
+	colMuted     = lipgloss.Color("8")  // grey — secondary text
+	colHi        = lipgloss.Color("15") // bright white — headlines
+	colVictory   = lipgloss.Color("10") // bright green
+	colDefeat    = lipgloss.Color("9")  // bright red
+	colStalemate = lipgloss.Color("7")  // white
 )
 
 var (
@@ -90,6 +90,9 @@ func (m Model) View() string {
 
 // shiftColumns offsets every line of s right by abs(n) spaces (the shake reads
 // as a recoil jolt). Negative n also shifts right — direction is cosmetic.
+// Lines contain zero-width ANSI escape codes, so prepending ASCII spaces
+// produces the correct visual column shift for screen-shake without disturbing
+// the rendered glyphs.
 func shiftColumns(s string, n int) string {
 	if n < 0 {
 		n = -n
@@ -275,7 +278,7 @@ func renderOutcome(o game.Outcome) string {
 		st = lipgloss.NewStyle().Bold(true).Foreground(colDefeat)
 	default:
 		head = "STALEMATE — the line holds."
-		st = lipgloss.NewStyle().Bold(true).Foreground(colStalemte)
+		st = lipgloss.NewStyle().Bold(true).Foreground(colStalemate)
 	}
 	detail := fmt.Sprintf("  Δline %+.2f   our losses -%s   enemy losses -%s",
 		o.GroundGained, game.FormatNum(o.PlayerAttrition), game.FormatNum(o.EnemyAttrition))
@@ -323,12 +326,4 @@ func paneInnerWidth(width int) int {
 		w = 10
 	}
 	return w
-}
-
-// min returns the smaller of two ints.
-func min(a, b int) int {
-	if a < b {
-		return a
-	}
-	return b
 }

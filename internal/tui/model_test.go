@@ -273,8 +273,7 @@ func TestQuitReturnsQuitCmdAndHoldsState(t *testing.T) {
 	if cmd == nil {
 		t.Fatalf("quit should return a command")
 	}
-	// The quit path is a Sequence(save, tea.Quit). Run it and confirm tea.Quit
-	// appears among the produced messages.
+	// The quit handler returns tea.Quit directly; main performs the final save after Run() returns.
 	if !cmdYieldsQuit(cmd) {
 		t.Fatalf("quit command should ultimately yield tea.Quit")
 	}
