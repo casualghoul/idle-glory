@@ -3,6 +3,7 @@ package tui
 import (
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/charmbracelet/lipgloss"
 
@@ -111,7 +112,7 @@ func shiftColumns(s string, n int) string {
 // renderAwayBanner shows the "while you were away" summary on first render.
 func (m Model) renderAwayBanner(width int) string {
 	msg := fmt.Sprintf("While you were away (%s): +%s munitions",
-		m.awayBanner.Duration.Round(1e9), game.FormatNum(m.awayBanner.MunitionsGained))
+		m.awayBanner.Duration.Round(time.Second), game.FormatNum(m.awayBanner.MunitionsGained))
 	style := lipgloss.NewStyle().
 		Foreground(colHi).
 		Background(colMud).
