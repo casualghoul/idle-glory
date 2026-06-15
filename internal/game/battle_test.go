@@ -3,7 +3,7 @@ package game_test
 import (
 	"testing"
 
-	"github.com/andrewhorton/glory/internal/game"
+	"github.com/casualghoul/idle-glory/internal/game"
 )
 
 func TestResolveBattle_Tie_Stalemate(t *testing.T) {

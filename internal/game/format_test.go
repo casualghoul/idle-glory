@@ -4,7 +4,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/andrewhorton/glory/internal/game"
+	"github.com/casualghoul/idle-glory/internal/game"
 )
 
 func TestFormatNum(t *testing.T) {

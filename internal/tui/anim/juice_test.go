@@ -4,7 +4,7 @@ import (
 	"math"
 	"testing"
 
-	"github.com/andrewhorton/glory/internal/tui/anim"
+	"github.com/casualghoul/idle-glory/internal/tui/anim"
 )
 
 // --- ValueSpring tests ---

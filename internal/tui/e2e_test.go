@@ -19,8 +19,8 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/x/exp/teatest"
 
-	"github.com/andrewhorton/glory/internal/game"
-	"github.com/andrewhorton/glory/internal/save"
+	"github.com/casualghoul/idle-glory/internal/game"
+	"github.com/casualghoul/idle-glory/internal/save"
 )
 
 // TestE2EBuyThenQuitSavesToDisk starts a running TUI program, buys an upgrade

@@ -28,8 +28,8 @@ import (
 
 	"github.com/charmbracelet/x/exp/teatest"
 
-	"github.com/andrewhorton/glory/internal/game"
-	"github.com/andrewhorton/glory/internal/save"
+	"github.com/casualghoul/idle-glory/internal/game"
+	"github.com/casualghoul/idle-glory/internal/save"
 )
 
 // goldenModel builds a model in a known static state at 80×24, springs settled,

@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/andrewhorton/glory/internal/tui/anim"
+	"github.com/casualghoul/idle-glory/internal/tui/anim"
 )
 
 func TestShellFlight_Endpoints(t *testing.T) {

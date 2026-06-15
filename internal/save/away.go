@@ -3,7 +3,7 @@ package save
 import (
 	"time"
 
-	"github.com/andrewhorton/glory/internal/game"
+	"github.com/casualghoul/idle-glory/internal/game"
 )
 
 // MaxAwayDuration is the upper bound on catch-up time applied when computing

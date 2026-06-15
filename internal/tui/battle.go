@@ -3,8 +3,8 @@ package tui
 import (
 	"time"
 
-	"github.com/andrewhorton/glory/internal/game"
-	"github.com/andrewhorton/glory/internal/tui/anim"
+	"github.com/casualghoul/idle-glory/internal/game"
+	"github.com/casualghoul/idle-glory/internal/tui/anim"
 )
 
 // phase enumerates the presentation states of the artillery offensive.

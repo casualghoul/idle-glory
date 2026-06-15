@@ -5,7 +5,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/andrewhorton/glory/internal/game"
+	"github.com/casualghoul/idle-glory/internal/game"
 )
 
 func TestCost_CompoundingAcrossOwnedValues(t *testing.T) {

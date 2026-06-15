@@ -4,7 +4,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/andrewhorton/glory/internal/game"
+	"github.com/casualghoul/idle-glory/internal/game"
 )
 
 // baseState returns a predictable State for away-progress tests.

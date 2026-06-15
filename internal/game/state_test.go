@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/andrewhorton/glory/internal/game"
+	"github.com/casualghoul/idle-glory/internal/game"
 )
 
 func TestTick_ZeroDt_NoChange(t *testing.T) {

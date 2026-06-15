@@ -6,8 +6,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/andrewhorton/glory/internal/game"
-	"github.com/andrewhorton/glory/internal/save"
+	"github.com/casualghoul/idle-glory/internal/game"
+	"github.com/casualghoul/idle-glory/internal/save"
 )
 
 // fakeClock is a controllable Clock for tests.

@@ -13,10 +13,10 @@ It's designed for the thirty seconds between prompts. You don't need to think ha
 **Go users (recommended):**
 
 ```sh
-go install github.com/andrewhorton/glory/cmd/glory@latest
+go install github.com/casualghoul/idle-glory/cmd/glory@latest
 ```
 
-**Prebuilt binaries** for Linux and macOS (amd64 / arm64) are available on the [GitHub Releases page](https://github.com/andrewhorton/glory/releases). Download, unarchive, and put the `glory` binary somewhere on your `$PATH`.
+**Prebuilt binaries** for Linux and macOS (amd64 / arm64) are available on the [GitHub Releases page](https://github.com/casualghoul/idle-glory/releases). Download, unarchive, and put the `glory` binary somewhere on your `$PATH`.
 
 ## Play
 
@@ -64,8 +64,8 @@ GLORY_SAVE_DIR=/tmp/glory-saves glory
 ## Build from source
 
 ```sh
-git clone https://github.com/andrewhorton/glory.git
-cd glory
+git clone https://github.com/casualghoul/idle-glory.git
+cd idle-glory
 go build -o glory ./cmd/glory
 ```
 

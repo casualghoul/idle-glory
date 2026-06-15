@@ -6,8 +6,8 @@ import (
 
 	tea "github.com/charmbracelet/bubbletea"
 
-	"github.com/andrewhorton/glory/internal/game"
-	"github.com/andrewhorton/glory/internal/save"
+	"github.com/casualghoul/idle-glory/internal/game"
+	"github.com/casualghoul/idle-glory/internal/save"
 )
 
 // fakeClock is a deterministic save.Clock for tests.

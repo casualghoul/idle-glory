@@ -21,9 +21,9 @@ import (
 
 	tea "github.com/charmbracelet/bubbletea"
 
-	"github.com/andrewhorton/glory/internal/game"
-	"github.com/andrewhorton/glory/internal/save"
-	"github.com/andrewhorton/glory/internal/tui"
+	"github.com/casualghoul/idle-glory/internal/game"
+	"github.com/casualghoul/idle-glory/internal/save"
+	"github.com/casualghoul/idle-glory/internal/tui"
 )
 
 // version is overridden at build time by GoReleaser via ldflags:

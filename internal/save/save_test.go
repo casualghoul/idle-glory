@@ -9,7 +9,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/andrewhorton/glory/internal/game"
+	"github.com/casualghoul/idle-glory/internal/game"
 )
 
 // fakeClock is an injectable Clock that returns a fixed time.

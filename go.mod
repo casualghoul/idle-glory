@@ -1,4 +1,4 @@
-module github.com/andrewhorton/glory
+module github.com/casualghoul/idle-glory
 
 go 1.26.4
 
