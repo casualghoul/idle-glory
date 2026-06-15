@@ -244,6 +244,15 @@ func TestCorruptSaveHandling(t *testing.T) {
 	}
 }
 
+// TestVersionStringDefault verifies that the version variable defaults to "dev"
+// (GoReleaser overrides it at release time via ldflags).
+func TestVersionStringDefault(t *testing.T) {
+	got := versionString()
+	if got != "dev" {
+		t.Errorf("versionString(): want %q, got %q", "dev", got)
+	}
+}
+
 // TestRunHeadlessProducesValidState verifies that runHeadless returns a state
 // with accumulated munitions and optionally a purchased upgrade, given
 // deterministic inputs.

@@ -26,6 +26,11 @@ import (
 	"github.com/andrewhorton/glory/internal/tui"
 )
 
+// version is overridden at build time by GoReleaser via ldflags:
+//
+//	-X main.version=<tag>
+var version = "dev"
+
 // headlessConfig holds the parameters for a headless run.
 // Keeping them in a struct makes runHeadless unit-testable with any inputs.
 type headlessConfig struct {
@@ -103,10 +108,22 @@ func printState(w io.Writer, s game.State) {
 	}
 }
 
+// versionString returns the current version string. It is a thin wrapper so
+// tests can assert the default value without launching main.
+func versionString() string {
+	return version
+}
+
 func main() {
 	headlessFlag := flag.Bool("headless", false,
 		"run a deterministic core-loop demo, save, and exit (useful for CI)")
+	versionFlag := flag.Bool("version", false, "print version and exit")
 	flag.Parse()
+
+	if *versionFlag {
+		fmt.Println(versionString())
+		return
+	}
 
 	headless := *headlessFlag || isTruthy(os.Getenv("GLORY_HEADLESS"))
 
