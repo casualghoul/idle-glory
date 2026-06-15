@@ -19,8 +19,11 @@ import (
 	"strings"
 	"time"
 
+	tea "github.com/charmbracelet/bubbletea"
+
 	"github.com/andrewhorton/glory/internal/game"
 	"github.com/andrewhorton/glory/internal/save"
+	"github.com/andrewhorton/glory/internal/tui"
 )
 
 // headlessConfig holds the parameters for a headless run.
@@ -128,6 +131,7 @@ func main() {
 	}
 
 	var state game.State
+	var awaySummary tui.AwaySummary
 
 	switch out.Result {
 	case save.LoadMissing:
@@ -143,16 +147,20 @@ func main() {
 	case save.LoadOK:
 		away := save.ApplyAwayProgress(out.State, out.SavedAt, clk)
 		state = away.State
+		awaySummary = tui.AwaySummary{
+			Duration:        away.Duration,
+			MunitionsGained: away.MunitionsGained,
+		}
 		if away.Duration > 0 {
 			fmt.Printf("While you were away (%v):\n", away.Duration.Round(time.Second))
 			fmt.Printf("  Munitions gained: %s\n", game.FormatNum(away.MunitionsGained))
 		}
 	}
 
-	fmt.Println("\nCurrent state:")
-	printState(os.Stdout, state)
-
 	if headless {
+		fmt.Println("\nCurrent state:")
+		printState(os.Stdout, state)
+
 		fmt.Println("\n[Headless] Running core-loop demo...")
 		state = runHeadless(state, clk, defaultHeadlessConfig)
 		fmt.Println("\nAfter demo ticks:")
@@ -166,12 +174,29 @@ func main() {
 		return
 	}
 
-	// TODO(T4): launch Bubble Tea program here.
-	fmt.Println("\nInteractive TUI not yet implemented — run with -headless for the core-loop demo.")
+	// Launch the live Bubble Tea TUI. Alt-screen keeps scrollback clean.
+	model := tui.New(state, saveDir, clk, awaySummary)
+	prog := tea.NewProgram(model, tea.WithAltScreen())
 
-	// Save on exit so the next launch can apply away-progress.
-	if err := save.Save(saveDir, clk, state); err != nil {
-		fmt.Fprintf(os.Stderr, "glory: save: %v\n", err)
+	finalModel, runErr := prog.Run()
+
+	// Determine the state to persist. Prefer the model's final state if we can
+	// read it back; fall back to the pre-launch state otherwise.
+	finalState := state
+	if fm, ok := finalModel.(tui.Model); ok {
+		finalState = fm.FinalState()
+	}
+
+	// Final save covers normal quit, ctrl-c, and SIGTERM — Bubble Tea returns
+	// from Run on all of those. The in-TUI save Cmd may not have flushed.
+	saveErr := save.Save(saveDir, clk, finalState)
+
+	if runErr != nil {
+		fmt.Fprintf(os.Stderr, "glory: run: %v\n", runErr)
+		os.Exit(1)
+	}
+	if saveErr != nil {
+		fmt.Fprintf(os.Stderr, "glory: save: %v\n", saveErr)
 		os.Exit(1)
 	}
 }
