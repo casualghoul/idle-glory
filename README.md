@@ -29,9 +29,9 @@ glory
 | Key | Action |
 |-----|--------|
 | `F` or `Space` | Fire artillery offensive |
-| `1` | Buy upgrade: Supply Lines (munitions rate) |
-| `2` | Buy upgrade: Rifles (army power) |
-| `3` | Buy upgrade: Artillery (army power + munitions rate) |
+| `1` | Buy upgrade: Supply Lines (+munitions rate) |
+| `2` | Buy upgrade: Rifle Issue (+army power) |
+| `3` | Buy upgrade: Artillery Battery (+army power) |
 | `q`, `Ctrl-C`, `Esc` | Quit |
 
 ### Headless / CI mode
