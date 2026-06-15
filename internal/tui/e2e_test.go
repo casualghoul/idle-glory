@@ -54,9 +54,21 @@ func TestE2EBuyThenQuitSavesToDisk(t *testing.T) {
 	// Buy upgrade [1] = supply_lines (cost 50, affordable from 500).
 	tm.Send(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune("1")})
 
-	// Give the Cmd time to execute (the save Cmd runs asynchronously).
-	// The buy triggers saveCmd immediately; we wait for it to complete.
-	time.Sleep(100 * time.Millisecond)
+	// The buy triggers saveCmd immediately, but the save Cmd runs
+	// asynchronously. Poll the save file until the purchase lands rather than
+	// sleeping a fixed duration — robust under CI load. Fails the test if it
+	// never appears within the deadline.
+	deadline := time.Now().Add(3 * time.Second)
+	for {
+		out, err := save.Load(dir, clk)
+		if err == nil && out.Result == save.LoadOK && out.State.OwnedCounts["supply_lines"] >= 1 {
+			break
+		}
+		if time.Now().After(deadline) {
+			t.Fatalf("on-purchase save never reached disk within deadline (last err=%v)", err)
+		}
+		time.Sleep(5 * time.Millisecond)
+	}
 
 	// Send quit.
 	tm.Send(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune("q")})
